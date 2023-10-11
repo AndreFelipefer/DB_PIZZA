@@ -164,12 +164,41 @@ values ('Frango', 29.99, 'Pizza de frango com borda recheada ','G','G','Papelao'
 ```
 ### 4- Crie um relatório com todas as pizzas e os pizzaiolos aptos a produzi-las;
 ```SQL
-
+create view PizzaDePizzaiolos as 
+select id_pizza,sabor, preco_pizza, id_pizzaiolo, nome
+from pizza inner join pizzaiolo
+order by preco_pizza asc limit 20;
 ```
+```SQL
+select * from PizzaDePizzaiolos;
+```
+![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/2bc61794-7799-475f-a56f-675e4ac76f95)
+
 ### 5- Crie um relatório com todas as pizzas e seus ingredientes;
 ```SQL
+CREATE VIEW ListaPizzasIngredientes AS
+SELECT
+    p.sabor AS sabor_da_pizza,
+    i.trigo,
+    i.molho_tomate,
+    i.queijo,
+    i.calabresa,
+    i.frango,
+    i.tomate,
+    i.peperoni,
+    i.brocolis,
+    i.bacon,
+    i.milho
+FROM
+    pizza AS p
+    LEFT JOIN ingredientes_has_pizza AS ip ON p.id_pizza = ip.pizza_id_pizza
+    LEFT JOIN ingredientes AS i ON ip.ingredientes_id_ingredientes = i.id_ingredientes;
 
 ```
+```SQL
+select * from ListaPizzasIngredientes;
+```
+
 ### 6- Crie um relatório com todos os ingredientes e as pizzas onde são utilizados;
 ```SQL
 
