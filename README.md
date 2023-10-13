@@ -6,7 +6,9 @@
 
 ### 1- Transforme o modelo conceitual em modelo lógico;
 
-![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/3d09265b-a0c9-4d1c-8d13-3159b088e466)
+![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/cc28e133-bbae-45e3-8cc4-3b4d59d296a0)
+
+
 
 
 ### 2- Escreva o script SQL que cria o banco de dados;
@@ -28,17 +30,6 @@ CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
 USE `mydb` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`receita`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`receita` (
-  `id_receita` INT NOT NULL AUTO_INCREMENT,
-  `instrucoes` VARCHAR(45) NULL,
-  `autor` VARCHAR(45) NULL,
-  PRIMARY KEY (`id_receita`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `mydb`.`pizza`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`pizza` (
@@ -46,16 +37,27 @@ CREATE TABLE IF NOT EXISTS `mydb`.`pizza` (
   `sabor` VARCHAR(45) NULL,
   `preco_pizza` DECIMAL(9,2) NULL,
   `descricao` VARCHAR(45) NULL,
-  `tamanho_pizza` CHAR(0) NULL,
-  `receita_id_receita` INT NOT NULL,
-  `tamanho_embalagem` CHAR(0) NULL,
+  `tamanho_pizza` CHAR(1) NULL,
+  `tamanho_embalagem` CHAR(1) NULL,
   `material` VARCHAR(45) NULL,
   `preco_embalagem` VARCHAR(45) NULL,
-  PRIMARY KEY (`id_pizza`, `receita_id_receita`),
-  INDEX `fk_pizza_receita1_idx` (`receita_id_receita` ASC) VISIBLE,
-  CONSTRAINT `fk_pizza_receita1`
-    FOREIGN KEY (`receita_id_receita`)
-    REFERENCES `mydb`.`receita` (`id_receita`)
+  PRIMARY KEY (`id_pizza`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`receita`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`receita` (
+  `id_receita` INT NOT NULL AUTO_INCREMENT,
+  `instrucoes` VARCHAR(45) NULL,
+  `autor` VARCHAR(45) NULL,
+  `pizza_id_pizza` INT NOT NULL,
+  PRIMARY KEY (`id_receita`, `pizza_id_pizza`),
+  INDEX `fk_receita_pizza1_idx` (`pizza_id_pizza` ASC) VISIBLE,
+  CONSTRAINT `fk_receita_pizza1`
+    FOREIGN KEY (`pizza_id_pizza`)
+    REFERENCES `mydb`.`pizza` (`id_pizza`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -65,9 +67,9 @@ ENGINE = InnoDB;
 -- Table `mydb`.`pizzaiolo`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`pizzaiolo` (
-  `id_pizzaiolo` INT NOT NULL,
+  `id_pizzaiolo` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(45) NULL,
-  `salario` DECIMAL(9,2) NULL,
+  `salario` DECIMAL(10,2) NULL,
   PRIMARY KEY (`id_pizzaiolo`))
 ENGINE = InnoDB;
 
@@ -99,16 +101,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`ingredientes` (
   `id_ingredientes` INT NOT NULL AUTO_INCREMENT,
-  `trigo` VARCHAR(45) NULL,
-  `molho_tomate` VARCHAR(45) NULL,
-  `queijo` VARCHAR(45) NULL,
-  `calabresa` VARCHAR(45) NULL,
-  `frango` VARCHAR(45) NULL,
-  `tomate` VARCHAR(45) NULL,
-  `peperoni` VARCHAR(45) NULL,
-  `brocolis` VARCHAR(45) NULL,
-  `bacon` VARCHAR(45) NULL,
-  `milho` VARCHAR(45) NULL,
+  `ingredientes_pizza` VARCHAR(45) NULL,
   PRIMARY KEY (`id_ingredientes`))
 ENGINE = InnoDB;
 
@@ -119,9 +112,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `mydb`.`ingredientes_has_pizza` (
   `ingredientes_id_ingredientes` INT NOT NULL,
   `pizza_id_pizza` INT NOT NULL,
-  `pizza_receita_id_receita` INT NOT NULL,
-  PRIMARY KEY (`ingredientes_id_ingredientes`, `pizza_id_pizza`, `pizza_receita_id_receita`),
-  INDEX `fk_ingredientes_has_pizza_pizza1_idx` (`pizza_id_pizza` ASC, `pizza_receita_id_receita` ASC) VISIBLE,
+  PRIMARY KEY (`ingredientes_id_ingredientes`, `pizza_id_pizza`),
+  INDEX `fk_ingredientes_has_pizza_pizza1_idx` (`pizza_id_pizza` ASC) VISIBLE,
   INDEX `fk_ingredientes_has_pizza_ingredientes1_idx` (`ingredientes_id_ingredientes` ASC) VISIBLE,
   CONSTRAINT `fk_ingredientes_has_pizza_ingredientes1`
     FOREIGN KEY (`ingredientes_id_ingredientes`)
@@ -129,8 +121,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`ingredientes_has_pizza` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ingredientes_has_pizza_pizza1`
-    FOREIGN KEY (`pizza_id_pizza` , `pizza_receita_id_receita`)
-    REFERENCES `mydb`.`pizza` (`id_pizza` , `receita_id_receita`)
+    FOREIGN KEY (`pizza_id_pizza`)
+    REFERENCES `mydb`.`pizza` (`id_pizza`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -140,69 +132,139 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
+
 ```
 ### 3- Insira dados no banco criado;
+
+## Pizza
+
 ```SQL
-insert into pizzaiolo (nome, salario) 
-values ('André Felipe', 8900),
-('Teruo Yamassaka', 8400),
-('Yasmin braz', 8300),
-('William Santos', 8100),
-('Juliana ferreira', 8900),
-('Kaua Seraphim', 8000);
+-- Mussarela
+INSERT INTO pizza (sabor, preco_pizza, descricao, tamanho_pizza, tamanho_embalagem, material, preco_embalagem)
+VALUES ('Mussarela', 22.99, 'Pizza de Mussarela', 'M', 'M', 'Papelao', 5.99);
+
+-- Frango com Catupiry
+INSERT INTO pizza (sabor, preco_pizza, descricao, tamanho_pizza, tamanho_embalagem, material, preco_embalagem)
+VALUES ('Frango com Catupiry', 24.99, 'Pizza de Frango com Catupiry', 'G', 'M', 'Papelao', 6.99);
+
+-- Portuguesa
+INSERT INTO pizza (sabor, preco_pizza, descricao, tamanho_pizza, tamanho_embalagem, material, preco_embalagem)
+VALUES ('Portuguesa', 23.99, 'Pizza Portuguesa', 'M', 'G', 'Papelao', 7.99);
+
+-- Vegetariana
+INSERT INTO pizza (sabor, preco_pizza, descricao, tamanho_pizza, tamanho_embalagem, material, preco_embalagem)
+VALUES ('Vegetariana', 21.99, 'Pizza Vegetariana', 'P', 'P', 'Papelao', 4.99);
+
+-- Chocolate
+INSERT INTO pizza (sabor, preco_pizza, descricao, tamanho_pizza, tamanho_embalagem, material, preco_embalagem)
+VALUES ('Chocolate', 20.99, 'Pizza de Chocolate', 'P', 'M', 'Papelao', 5.99);
+
+-- Peperoni
+INSERT INTO pizza (sabor, preco_pizza, descricao, tamanho_pizza, tamanho_embalagem, material, preco_embalagem)
+VALUES ('Peperoni', 22.99, 'Pizza de Peperoni', 'P', 'G', 'Papelao', 6.99);
+
 ```
+## Ingredientes 
+```SQL 
+-- Mussarela
+INSERT INTO ingredientes (ingredientes_pizza)
+VALUES ('molho de tomate'), ('queijo mussarela');
+
+-- Frango com Catupiry
+INSERT INTO ingredientes (ingredientes_pizza)
+VALUES ('molho de tomate'), ('frango desfiado'), ('catupiry');
+
+-- Portuguesa
+INSERT INTO ingredientes (ingredientes_pizza)
+VALUES ('molho de tomate'), ('presunto'), ('queijo mussarela'), ('ovo'), ('azeitonas'), ('orégano');
+
+-- Vegetariana
+INSERT INTO ingredientes (ingredientes_pizza)
+VALUES ('molho de tomate'), ('queijo mussarela'), ('tomate'), ('cebola'), ('azeitonas'), ('orégano');
+
+-- Chocolate
+INSERT INTO ingredientes (ingredientes_pizza)
+VALUES ('molho de chocolate'), ('chocolate derretido');
+
+-- Peperoni
+INSERT INTO ingredientes (ingredientes_pizza)
+VALUES ('molho de tomate'), ('queijo mussarela'), ('rodelas de pepperoni');
+```
+## Pizzaiolo
 ```SQL
-insert into pizza (sabor, preco_pizza, descricao,
-tamanho_pizza, tamanho_embalagem, material, preco_embalagem)
-values ('Frango', 29.99, 'Pizza de frango com borda recheada ','G','G','Papelao', 7.99),
-('Queijo', 29.99, 'Pizza de queijo com borda recheada', 'G', 'G', 'Papelao', 7.99),
-('Calabresa', 27.99, 'Pizza de calabresa com borda recheada', 'M', 'M', 'Papelao', 5.99),
-('Pepperoni', 29.99, 'Pizza de pepperoni com borda recheada', 'G', 'G', 'Papelao', 7.99),
-('Brócolis', 22.99, 'Pizza de brócolis', 'P', 'P', 'Papelao', 3.99),
-('Bacon', 27.99, 'Pizza de bacon com borda recheada', 'M', 'M', 'Papelao', 5.99),
-('Milho', 22.99, 'Pizza de milho ', 'P', 'P', 'Papelao', 3.99);
+insert into pizzaiolo (nome, salario)
+values ('Maria', 1199.99);
+
+insert into pizzaiolo (nome, salario)
+values ('João', 1199.99);
+
+insert into pizzaiolo (nome, salario)
+values ('Ana', 1199.99);
+
+insert into pizzaiolo (nome, salario)
+values ('Carlos', 1199.99);
+
+```
+
+## Receita/Autor
+```SQL
+INSERT INTO receita (instrucoes, autor, pizza_id_pizza)
+VALUES ('Massa de pizza, molho de tomate, queijo mussarela', 'Jorge', 1),
+('Massa de pizza, molho de tomate, frango desfiado, catupiry', 'Maria', 2),
+('Massa de pizza, molho de tomate, presunto, queijo mussarela, ovo, azeitonas e orégano', 'João', 3),
+('Massa de pizza, molho de tomate, queijo mussarela, tomate, cebola, azeitonas e orégano', 'Ana', 4),
+('Massa de pizza, molho de chocolate, chocolate derretido', 'Jorge', 5),
+('Massa de pizza, molho de tomate, queijo mussarela, rodelas de pepperoni', 'Carlos', 6);
+```
+## Tabela de relação Pizza x Pizzaiolo
+```SQL
+insert into  pizza_has_pizzaiolo ( pizza_id_pizza, pizzaiolo_id_pizzaiolo) values
+(1, 1), (2,2) , (3,3), (4,4), (5,2) ,(6,4);
 ```
 ### 4- Crie um relatório com todas as pizzas e os pizzaiolos aptos a produzi-las;
 ```SQL
-create view PizzaDePizzaiolos as 
-select id_pizza,sabor, preco_pizza, id_pizzaiolo, nome
-from pizza inner join pizzaiolo
-order by preco_pizza asc limit 20;
+select pizza.sabor as Tab_SaborPizza, pizzaiolo.nome as pizzaiolo 
+from pizza 
+join pizza_has_pizzaiolo on pizza.id_pizza = pizza_has_pizzaiolo.pizza_id_pizza 
+join pizzaiolo on pizza_has_pizzaiolo.pizzaiolo_id_pizzaiolo  = pizzaiolo.id_pizzaiolo;
 ```
-```SQL
-select * from PizzaDePizzaiolos;
-```
-![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/2bc61794-7799-475f-a56f-675e4ac76f95)
+![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/2033c93a-19f7-4ae0-b0ca-7f1bf0dcd1fd)
+
 
 ### 5- Crie um relatório com todas as pizzas e seus ingredientes;
 ```SQL
-CREATE VIEW ListaPizzasIngredientes AS
-SELECT
-    p.sabor AS sabor_da_pizza,
-    i.trigo,
-    i.molho_tomate,
-    i.queijo,
-    i.calabresa,
-    i.frango,
-    i.tomate,
-    i.peperoni,
-    i.brocolis,
-    i.bacon,
-    i.milho
-FROM
-    pizza AS p
-    LEFT JOIN ingredientes_has_pizza AS ip ON p.id_pizza = ip.pizza_id_pizza
-    LEFT JOIN ingredientes AS i ON ip.ingredientes_id_ingredientes = i.id_ingredientes;
+select 
+	pizza.sabor as sabor, 
+   group_concat( ingredientes.ingredientes_pizza) as ingredientes
+from pizza join ingredientes_has_pizza on pizza.id_pizza =  ingredientes_has_pizza.pizza_id_pizza
+join ingredientes on ingredientes_has_pizza.ingredientes_id_ingredientes = ingredientes.id_ingredientes
+group by pizza.sabor;
+```
+![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/7a47c85d-f206-42f9-9d7c-f78e2e799f88)
 
-```
-```SQL
-select * from ListaPizzasIngredientes;
-```
 
 ### 6- Crie um relatório com todos os ingredientes e as pizzas onde são utilizados;
 ```SQL
-
+select 
+	ingredientes.ingredientes_pizza as Ingredientes,
+    group_concat(pizza.sabor) as Sabor
+from ingredientes join ingredientes_has_pizza on ingredientes.id_ingredientes =  ingredientes_has_pizza.ingredientes_id_ingredientes
+join pizza on ingredientes_has_pizza.pizza_id_pizza = pizza.id_pizza
+GROUP BY ingredientes.ingredientes_pizza;
 ```
-### 7- Crie um relatório com os sabores de todas as pizzas, o nome dos pizzaiolos que as fazem e as instruções para produzi-las;
+![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/dd342792-66a0-45f1-97fe-8c33f920e719)
 
+### 7- Crie um relatório com os sabores de todas as pizzas, o nome dos pizzaiolos que as fazem e as instruções para produzi-las;
+```SQL
+select 
+	ingredientes.ingredientes_pizza as Ingredientes,
+    group_concat(pizza.sabor) as Sabor
+from ingredientes join ingredientes_has_pizza on ingredientes.id_ingredientes =  ingredientes_has_pizza.ingredientes_id_ingredientes
+join pizza on ingredientes_has_pizza.pizza_id_pizza = pizza.id_pizza
+GROUP BY ingredientes.ingredientes_pizza;
+```
+![image](https://github.com/AndreFelipefer/DB_PIZZA/assets/129207232/ce6dd7e4-6834-4969-b054-dec4f9d426ac)
+
+
+# Obrigadooo!
 
